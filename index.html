@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Татаал тест</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: linear-gradient(135deg,#1e3c72,#2a5298);
+    margin:0;
+    padding:10px;
+}
+
+.container {
+    max-width:700px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:15px;
+}
+
+.timer { text-align:right; color:red; }
+
+.question { font-size:18px; margin:10px 0; }
+
+.answers button {
+    width:100%;
+    padding:12px;
+    margin:6px 0;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#eee;
+}
+
+.answers button:hover {
+    background:#1e3c72;
+    color:white;
+}
+
+.correct { color:green; }
+.wrong { color:red; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h2>Татаал тест</h2>
+<div class="timer" id="timer">05:00</div>
+<div id="quiz"></div>
+<div id="result"></div>
+</div>
+
+<script>
+
+const questions = [
+{q:"Кыргызстандын көп улуттуу болушу кайсы тарыхый фактор менен көбүрөөк байланыштуу?",a:["Көчмөн маданият","Географиялык жайгашуу жана Улуу Жибек жолу","Деңиз соодасы","Колониялык аралдар"],c:1},
+
+{q:"Көчмөн жашоо образы улуттук маданиятка кандай таасир берген?",a:["Шаар маданиятын күчөткөн","Мал чарбачылыкка негизделген салттарды түзгөн","Өнөр жайды өнүктүргөн","Деңиз маданиятын түзгөн"],c:1},
+
+{q:"Кыргыз тилинин мамлекеттик статусу эмнени камсыз кылат?",a:["Башка тилдерди жок кылат","Мамлекеттик башкарууда колдонулат","Эл аралык тил болот","Колдонулбайт"],c:1},
+
+{q:"Манас эпосунун мааниси эмнеде?",a:["Жөн жомок","Тарыхый жана маданий мурас","Оюн","Кино сценарий"],c:1},
+
+{q:"Калпактын символдук мааниси кандай?",a:["Жөн кийим","Улуттук иденттүүлүк","Соода белгиси","Мода"],c:1},
+
+{q:"Нооруз майрамы эмнени билдирет?",a:["Согуш","Жаңы жыл жана жаңылануу","Соода күнү","Эс алуу"],c:1},
+
+{q:"Кыргызстандын этникалык ар түрдүүлүгү эмнеге алып келет?",a:["Талаш","Маданий байлык","Кыйынчылык гана","Жок"],c:1},
+
+{q:"Улуттук өзгөчөлүк кайсы элементтердин жыйындысы?",a:["Тамак гана","Тил, маданият, салт","Кийим","Оюн"],c:1},
+
+{q:"Көчмөндөрдүн негизги чарбасы эмне болгон?",a:["Деңиз","Мал чарба","Завод","IT"],c:1},
+
+{q:"Кыргызстандын географиясы маданиятка кандай таасир эткен?",a:["Таасир этпейт","Көчмөн жашоону шарттаган","Деңиз түзгөн","Шаар курган"],c:1},
+
+{q:"Улуттук кийимдер эмнени чагылдырат?",a:["Мода","Тарых жана шарт","Жөн кийим","Оюн"],c:1},
+
+{q:"Улуттар аралык достук эмнеге маанилүү?",a:["Талаш үчүн","Тынчтык жана өнүгүү үчүн","Акча үчүн","Оюн үчүн"],c:1},
+
+{q:"Кыргызстандагы маданий мурастар эмнени көрсөтөт?",a:["Өткөн жок","Элдин тарыхын жана өзгөчөлүгүн","Кино","Спорт"],c:1}
+];
+
+// аралаштыруу
+function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+        let j=Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+}
+shuffle(questions);
+
+let index=0, score=0, userAnswers=[];
+
+function showQuestion(){
+    if(index>=questions.length) return finish();
+
+    let q=questions[index];
+    let options=q.a.map((t,i)=>({t,correct:i===q.c}));
+    shuffle(options);
+
+    let html=`<div class="question">${index+1}. ${q.q}</div><div class="answers">`;
+
+    options.forEach(o=>{
+        html+=`<button onclick="answer(${o.correct})">${o.t}</button>`;
+    });
+
+    html+="</div>";
+    document.getElementById("quiz").innerHTML=html;
+}
+
+function answer(c){
+    userAnswers.push(c);
+    if(c) score++;
+    index++;
+    showQuestion();
+}
+
+function finish(){
+    document.getElementById("quiz").innerHTML="";
+
+    let grade="";
+    if(score>=13) grade="5";
+    else if(score>=10) grade="4";
+    else if(score>=7) grade="3";
+    else grade="2";
+
+    let review="<h3>Текшерүү:</h3>";
+    userAnswers.forEach((a,i)=>{
+        review+= a
+        ? `<p class="correct">${i+1}. Туура</p>`
+        : `<p class="wrong">${i+1}. Ката</p>`;
+    });
+
+    document.getElementById("result").innerHTML=
+        `Жыйынтык: ${score}/15 <br> Баа: ${grade}`+review;
+}
+
+// таймер
+let time=300;
+let t=setInterval(()=>{
+    let m=Math.floor(time/60);
+    let s=time%60;
+    document.getElementById("timer").innerHTML=
+        (m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+
+    time--;
+    if(time<0){
+        clearInterval(t);
+        finish();
+    }
+},1000);
+
+showQuestion();
+</script>
+
+</body>
+</html>
